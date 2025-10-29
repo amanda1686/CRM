@@ -2,7 +2,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "create-admin": "node scripts/createAdmin.js"
+    "create-admin": "node scripts/createAdmin.js",
+    "sync-db": "node scripts/syncSchema.js"
   },
   "engines": {
     "node": ">=18.0.0"
