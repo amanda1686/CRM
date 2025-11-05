@@ -11,15 +11,22 @@ import notificationsRoutes from "./Routes/notifications.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
-const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:8080")
+const defaultAllowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:3000",
+  "http://localhost:5173",
+];
+const envAllowedOrigins = (process.env.CORS_ORIGINS ?? "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
-const allowAllOrigins = allowedOrigins.includes("*");
+const effectiveAllowedOrigins =
+  envAllowedOrigins.length > 0 ? envAllowedOrigins : defaultAllowedOrigins;
+const allowAllOrigins = effectiveAllowedOrigins.includes("*");
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) {
+    if (!origin || allowAllOrigins || effectiveAllowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error("Origen no permitido por CORS"));
