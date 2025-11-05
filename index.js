@@ -14,6 +14,7 @@ const port = Number(process.env.PORT ?? 3001);
 const defaultAllowedOrigins = [
   "http://localhost:8080",
   "http://localhost:3000",
+  "http://localhost:3002",
   "http://localhost:5173",
 ];
 const envAllowedOrigins = (process.env.CORS_ORIGINS ?? "")
