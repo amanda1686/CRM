@@ -10,8 +10,14 @@ import "../Models/testigos.js";
 
 async function main() {
   const sequelize = await db.connectDB();
-  await sequelize.sync({ alter: true });
-  console.log("[db] Esquema sincronizado");
+  // Forzamos la creación de las tablas
+  await sequelize.sync({ force: true });
+  console.log("[db] Esquema sincronizado y tablas creadas");
+  
+  // Verificamos las tablas creadas
+  const [results] = await sequelize.query('SHOW TABLES;');
+  console.log("[db] Tablas creadas:", results);
+  
   await db.closeDB();
 }
 

@@ -8,10 +8,10 @@ const dbName = process.env.DB_NAME ?? "CRM";
 const dbUser = process.env.DB_USER ?? "root";
 const dbPassword = process.env.DB_PASSWORD ?? "";
 const dbHost = process.env.DB_HOST ?? "localhost";
-const dbPort = Number(process.env.DB_PORT ?? 3306);
+const dbPort = Number(process.env.DB_PORT ?? 4000);
 const maxPool = Number(process.env.DB_MAX_POOL ?? 10);
-const sslEnabled = String(process.env.DB_SSL ?? "").toLowerCase() === "true";
-const sslRejectUnauthorized = String(process.env.DB_SSL_REJECT_UNAUTHORIZED ?? "true").toLowerCase() !== "false";
+const sslEnabled = true; // TiDB Cloud requiere SSL
+const sslRejectUnauthorized = true;
 
 function buildDialectOptions() {
   const options = {
