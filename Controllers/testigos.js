@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import TestigosModel from "../Models/testigos.js";
+import TestigosModel, { validarTestigo } from "../Models/testigos.js";
 import EjercienteModel from "../Models/ejercientes.js";
 
 const EJERCIENTE_ATTRIBUTES = [
@@ -77,6 +77,84 @@ export async function listarTestigos(_req, res) {
     });
 
     res.json(items);
+  } catch (error) {
+    return handleControllerError(res, error);
+  }
+}
+export async function crearTestigo(req, res) {
+  try {
+    const payload = { ...(req.body ?? {}) };
+    const numApi = Number(payload.Num_api ?? payload.num_api);
+
+    if (!Number.isInteger(numApi)) {
+      return res.status(400).json({ error: "Num_api es obligatorio y debe ser numerico" });
+    }
+
+    payload.Num_api = numApi;
+    const errores = validarTestigo(payload);
+    if (errores.length > 0) {
+      return res.status(400).json({ error: "Datos invalidos", detalles: errores });
+    }
+
+    const ejerciente = await EjercienteModel.findOne({
+      where: { Num_api: numApi },
+      attributes: EJERCIENTE_ATTRIBUTES,
+      raw: true,
+    });
+
+    if (!ejerciente) {
+      return res.status(404).json({ error: "Ejerciente no encontrado" });
+    }
+
+    const normalized = {
+      Num_api: numApi,
+      Fecha: payload.Fecha ?? payload.fecha ?? undefined,
+      Tipo: payload.Tipo ?? payload.tipo ?? undefined,
+      CP: payload.CP ?? payload.cp ?? undefined,
+      Dir: payload.Dir ?? payload.dir ?? undefined,
+      zona: payload.zona ?? payload.Zona ?? undefined,
+      Eur_m2: payload.Eur_m2 ?? payload.eur_m2 ?? undefined,
+      Operacion: payload.Operacion ?? payload.operacion ?? undefined,
+      Sup_m2: payload.Sup_m2 ?? payload.sup_m2 ?? undefined,
+    };
+
+    if (normalized.Fecha) {
+      normalized.Fecha = new Date(normalized.Fecha);
+    }
+
+    ["Eur_m2", "Sup_m2"].forEach((field) => {
+      const value = normalized[field];
+      if (value !== undefined && value !== null && value !== "") {
+        normalized[field] = Number(value);
+      } else {
+        delete normalized[field];
+      }
+    });
+
+    ["Tipo", "CP", "Dir", "zona", "Operacion"].forEach((field) => {
+      const value = normalized[field];
+      if (value === undefined || value === null) {
+        delete normalized[field];
+      } else {
+        const trimmed = String(value).trim();
+        if (trimmed) {
+          normalized[field] = trimmed;
+        } else {
+          delete normalized[field];
+        }
+      }
+    });
+
+    const testigo = await TestigosModel.create(normalized);
+
+    return res
+      .status(201)
+      .json(
+        sanitizeTestigos({
+          ...(testigo.toJSON ? testigo.toJSON() : testigo),
+          ejerciente,
+        })
+      );
   } catch (error) {
     return handleControllerError(res, error);
   }
