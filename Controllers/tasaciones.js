@@ -1,6 +1,7 @@
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import TasacionesModel, { validarTasacion } from "../Models/tasaciones.js";
 import EjercienteModel from "../Models/ejercientes.js";
+import db from "../database/db.js";
 
 const EJERCIENTE_ATTRIBUTES = [
   "IdEjerciente",
@@ -41,35 +42,63 @@ function handleControllerError(res, error) {
   });
 }
 
+function normalizeNumApi(value) {
+  if (value === undefined || value === null) return null;
+  const raw = String(value).trim();
+  if (!raw) return null;
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric)) return String(numeric);
+  return raw;
+}
+
 export async function listarTasaciones(_req, res) {
   try {
-    const tasaciones = await TasacionesModel.findAll({
-      order: [["created_at", "DESC"]],
-      raw: true,
-    });
+    const tasaciones = await db.sequelize.query(
+      `SELECT
+        sess,
+        ref,
+        api AS Num_api,
+        fecha,
+        tipo AS Tipo,
+        dir AS Direccion,
+        num AS Numero,
+        cp,
+        pais,
+        lat,
+        lng
+      FROM tasa
+      ORDER BY fecha DESC`,
+      { type: QueryTypes.SELECT }
+    );
 
     const numApis = Array.from(
       new Set(
         tasaciones
-          .map((tasacion) => Number(tasacion.Num_api))
-          .filter((value) => Number.isFinite(value))
+          .map((tasacion) => normalizeNumApi(tasacion.Num_api))
+          .filter(Boolean)
       )
     );
 
     const ejercientes = numApis.length
       ? await EjercienteModel.findAll({
-          where: { Num_api: { [Op.in]: numApis } },
+          where: {
+            Num_api: {
+              [Op.in]: numApis,
+            },
+          },
           attributes: EJERCIENTE_ATTRIBUTES,
           raw: true,
         })
       : [];
 
     const ejercienteMap = new Map(
-      ejercientes.map((ejerciente) => [Number(ejerciente.Num_api), ejerciente])
+      ejercientes
+        .map((ejerciente) => [normalizeNumApi(ejerciente.Num_api), ejerciente])
+        .filter(([key]) => key)
     );
 
     const items = tasaciones.map((tasacion) => {
-      const ejerciente = ejercienteMap.get(Number(tasacion.Num_api));
+      const ejerciente = ejercienteMap.get(normalizeNumApi(tasacion.Num_api));
       return sanitizeTasacion({
         ...tasacion,
         ejerciente: ejerciente ? { ...ejerciente } : undefined,

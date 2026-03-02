@@ -1,6 +1,7 @@
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import TestigosModel, { validarTestigo } from "../Models/testigos.js";
 import EjercienteModel from "../Models/ejercientes.js";
+import db from "../database/db.js";
 
 const EJERCIENTE_ATTRIBUTES = [
   "IdEjerciente",
@@ -41,35 +42,68 @@ function handleControllerError(res, error) {
   });
 }
 
+function normalizeNumApi(value) {
+  if (value === undefined || value === null) return null;
+  const raw = String(value).trim();
+  if (!raw) return null;
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric)) return String(numeric);
+  return raw;
+}
+
 export async function listarTestigos(_req, res) {
   try {
-    const testigos = await TestigosModel.findAll({
-      order: [["created_at", "DESC"]],
-      raw: true,
-    });
+    const testigos = await db.sequelize.query(
+      `SELECT
+        numero AS id,
+        Num_api,
+        fecha AS Fecha,
+        tipotes AS Tipo,
+        cp AS CP,
+        dir AS Dir,
+        zona,
+        valor AS Eur_m2,
+        superficie AS Sup_m2,
+        tipodir,
+        num AS Numero,
+        localidad,
+        provincia,
+        pais,
+        lat,
+        lng
+      FROM testigos
+      ORDER BY fecha DESC, numero DESC`,
+      { type: QueryTypes.SELECT }
+    );
 
     const numApis = Array.from(
       new Set(
         testigos
-          .map((testigo) => Number(testigo.Num_api))
-          .filter((value) => Number.isFinite(value))
+          .map((testigo) => normalizeNumApi(testigo.Num_api))
+          .filter(Boolean)
       )
     );
 
     const ejercientes = numApis.length
       ? await EjercienteModel.findAll({
-          where: { Num_api: { [Op.in]: numApis } },
+          where: {
+            Num_api: {
+              [Op.in]: numApis,
+            },
+          },
           attributes: EJERCIENTE_ATTRIBUTES,
           raw: true,
         })
       : [];
 
     const ejercienteMap = new Map(
-      ejercientes.map((ejerciente) => [Number(ejerciente.Num_api), ejerciente])
+      ejercientes
+        .map((ejerciente) => [normalizeNumApi(ejerciente.Num_api), ejerciente])
+        .filter(([key]) => key)
     );
 
     const items = testigos.map((testigo) => {
-      const ejerciente = ejercienteMap.get(Number(testigo.Num_api));
+      const ejerciente = ejercienteMap.get(normalizeNumApi(testigo.Num_api));
       return sanitizeTestigos({
         ...testigo,
         ejerciente: ejerciente ? { ...ejerciente } : undefined,

@@ -6,63 +6,58 @@ const sequelize = db.sequelize;
 const TestigosModel = sequelize.define(
   "Testigo",
   {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    numero: {
+      type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
     },
     Num_api: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.STRING(9),
       allowNull: false,
     },
     Fecha: {
-      type: DataTypes.DATE,
-      allowNull: true,
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      field: "fecha",
     },
     Tipo: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
+      type: DataTypes.STRING(25),
+      allowNull: false,
+      field: "tipotes",
     },
     CP: {
-      type: DataTypes.STRING(10),
-      allowNull: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "cp",
     },
     Dir: {
       type: DataTypes.STRING(255),
-      allowNull: true,
+      allowNull: false,
+      field: "dir",
     },
     zona: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     Eur_m2: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: true,
-    },
-    Operacion: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
+      allowNull: false,
+      field: "valor",
     },
     Sup_m2: {
-      type: DataTypes.DECIMAL(12, 2),
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      field: "superficie",
+    },
+    Operacion: {
+      type: DataTypes.STRING(10),
       allowNull: true,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
+      field: "tipoinm",
     },
   },
   {
     tableName: "testigos",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
+    timestamps: false,
   }
 );
 

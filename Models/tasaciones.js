@@ -6,55 +6,60 @@ const sequelize = db.sequelize;
 const TasacionesModel = sequelize.define(
   "Tasacion",
   {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    sess: {
+      type: DataTypes.STRING(255),
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
+    },
+    ref: {
+      type: DataTypes.STRING(25),
+      primaryKey: true,
+      allowNull: false,
     },
     Num_api: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: true,
+      type: DataTypes.STRING(9),
+      allowNull: false,
+      field: "api",
     },
     Tipo: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(25),
       allowNull: true,
+      field: "tipo",
+    },
+    Direccion: {
+      type: DataTypes.STRING(60),
+      allowNull: true,
+      field: "dir",
+    },
+    Numero: {
+      type: DataTypes.STRING(25),
+      allowNull: true,
+      field: "num",
     },
     cp: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     fecha: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    Sup_m2: {
-      type: DataTypes.DECIMAL(12, 2),
-      allowNull: true,
-    },
-    Valor_total: {
-      type: DataTypes.DECIMAL(15, 2),
-      allowNull: true,
-    },
-    Eur_m2: {
-      type: DataTypes.DECIMAL(12, 2),
-      allowNull: true,
-    },
-    created_at: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
     },
-    updated_at: {
-      type: DataTypes.DATE,
+    pais: {
+      type: DataTypes.STRING(50),
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+    },
+    lat: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    lng: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
     },
   },
   {
-    tableName: "tasaciones",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
+    tableName: "tasa",
+    timestamps: false,
   }
 );
 
