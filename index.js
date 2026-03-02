@@ -59,12 +59,21 @@ app.use((err, req, res, next) => {
   return next(err);
 });
 
+// Rutas legacy (sin prefijo /api)
 app.use("/auth", authRoutes);
 app.use("/ejercientes", ejercientesRoutes);
 app.use("/tasaciones", tasacionesRoutes);
 app.use("/testigos", testigosRoutes);
 app.use("/communications", communicationsRoutes);
 app.use("/notifications", notificationsRoutes);
+
+// Alias de compatibilidad con frontend que consume /api/*
+app.use("/api/auth", authRoutes);
+app.use("/api/ejercientes", ejercientesRoutes);
+app.use("/api/tasaciones", tasacionesRoutes);
+app.use("/api/testigos", testigosRoutes);
+app.use("/api/communications", communicationsRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Servidor Express funcionando");
