@@ -152,6 +152,19 @@ function limpiarPayload(body) {
   return payload;
 }
 
+function normalizeOptionalPassword(value) {
+  if (value === undefined || value === null) return null;
+  const normalized = String(value).trim();
+  if (!normalized) return null;
+  if (normalized.toLowerCase() === "null" || normalized.toLowerCase() === "undefined") {
+    return null;
+  }
+  if (/^\*+$/.test(normalized)) {
+    return null;
+  }
+  return normalized;
+}
+
 export const cambiarContrasena = async (req, res) => {
   try {
     const { contrasena, contrasenaActual } = req.body ?? {};
@@ -272,7 +285,7 @@ export const actualizarEjerciente = async (req, res) => {
 
     const authId = Number(req.auth?.IdEjerciente ?? req.auth?.id);
     const isSelfUpdate = Number.isInteger(authId) && authId === id;
-    const isAdmin = req.user?.Nivel === 1;
+    const isAdmin = Number(req.user?.Nivel ?? req.user?.nivel) === 1;
 
     let allowedFields;
     if (isAdmin) {
@@ -320,7 +333,7 @@ export const actualizarEjerciente = async (req, res) => {
     }
 
     if (isAdmin && Object.prototype.hasOwnProperty.call(payload, "contrasena")) {
-      const normalizedPassword = String(payload.contrasena ?? "").trim();
+      const normalizedPassword = normalizeOptionalPassword(payload.contrasena);
       if (!normalizedPassword) {
         delete payload.contrasena;
       } else if (normalizedPassword.includes(":")) {
