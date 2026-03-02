@@ -12,7 +12,9 @@ const dbPort = Number(process.env.DB_PORT ?? 3306);
 const maxPool = Number(process.env.DB_MAX_POOL ?? 10);
 
 const sslEnabled = (process.env.DB_SSL ?? "required").toLowerCase() !== "disabled";
-const sslRejectUnauthorized = true;
+const sslRejectUnauthorized =
+  (process.env.DB_SSL_REJECT_UNAUTHORIZED ?? "true").toLowerCase() !== "false";
+
 
 
 function buildDialectOptions() {
