@@ -9,6 +9,7 @@ const dbUser = process.env.DB_USER ?? "root";
 const dbPassword = process.env.DB_PASSWORD ?? "";
 const dbHost = process.env.DB_HOST ?? "localhost";
 const dbPort = Number(process.env.DB_PORT ?? 3306);
+const maxPool = Number(process.env.DB_MAX_POOL ?? 10);
 
 const sslEnabled = (process.env.DB_SSL ?? "required").toLowerCase() !== "disabled";
 const sslRejectUnauthorized = true;
@@ -60,7 +61,7 @@ function createSequelizeInstance() {
     dialect: "mysql",
     logging: false,
     pool: {
-      max: maxPool,
+      max: Number.isFinite(maxPool) ? maxPool : 10,
       min: 0,
       acquire: 30_000,
       idle: 10_000,
